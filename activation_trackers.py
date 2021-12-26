@@ -14,11 +14,6 @@ class Hook():
         self.hook.remove()
 
 
-"""
-Difference between DataTracker and GCNDataTracker: They have different numbers when it comes to 
-extracting the gradient of the parameters in the backward hook
-"""
-
 class ActivationTracker:
     """
     This is a general method for tracking activations of any PyTorch network the user defines,

@@ -1,5 +1,9 @@
 import numpy as np
 
+"""
+Difference between DataTracker and GCNDataTracker: They have different numbers when it comes to 
+extracting the gradient of the parameters in the backward hook
+"""
 
 class Hook():
     def __init__(self, module, backward=False):
