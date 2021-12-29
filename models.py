@@ -3,8 +3,6 @@ import torch.nn as nn
 from torch_geometric.nn import GCNConv, GINConv, GATConv
 
 
-
-
 class GAT(torch.nn.Module):
     def __init__(self, hidden_channels, num_classes, num_features, activation="relu"):
         def act_func(activation):
@@ -36,7 +34,6 @@ class GAT(torch.nn.Module):
         return x
 
 
-
 class GIN(torch.nn.Module):
     def __init__(self, hidden_channels, num_classes, num_features, activation="relu"):
         def act_func(activation):
@@ -66,8 +63,6 @@ class GIN(torch.nn.Module):
 
         x = self.gin_conv4(x, edge_index)
         return x
-
-
 
 
 class GCN(torch.nn.Module):
@@ -130,3 +125,16 @@ class MLP(torch.nn.Module):
 
         x = self.fc4(x)
         return x
+
+
+def get_and_create_model(model_name, model_parameters):
+    if model_name == "GCN":
+        return GCN(**model_parameters)
+    elif model_name == "GAT":
+        return GAT(**model_parameters)
+    elif model_name == "GIN":
+        return GIN(**model_parameters)
+    elif model_name == "MLP":
+        return MLP(**model_parameters)
+    else:
+        print(f"model name {model_name} is not available")

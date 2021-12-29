@@ -131,3 +131,7 @@ dmypy.json
 # data folder
 
 data/
+
+# folder that tracks stored activations
+
+activations/
