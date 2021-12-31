@@ -14,8 +14,14 @@ import dill
 
 
 
-def train(model, tracker, optimizer, criterion, data_, split_indices, num_epochs, verbose=True, model_name=None):
+def train(model, tracker, optimizer, criterion, data_, split_indices, num_epochs, device, verbose=True, model_name=None):
     losses, val_accuracies, train_accuracies = [], [], []
+    for key in split_indices:
+        split_indices[key] = split_indices[key].to(device)
+    data_.x = data_.x.to(device)
+    data_.edge_index = data_.edge_index.to(device)
+    data_.y = data_.y.to(device)
+
     for epoch in range(1, num_epochs):
         tracker.register_new_epoch(['act1', 'act2', 'act3'])
         model.train()
@@ -88,7 +94,8 @@ if __name__ == "__main__":
         criterion= torch.nn.CrossEntropyLoss(),
         data_=data,
         num_epochs=int(args.epochs),
-        model_name=model_name
+        model_name=model_name,
+        device=device
     )
     print("Finished training, writing data to file")
     now = time.strftime("%d%m%Y-%H%M%S")
