@@ -1,7 +1,9 @@
 from numpy.core.fromnumeric import prod
 from ogb.nodeproppred import PygNodePropPredDataset
+from torch_geometric import data
 from torch_geometric.datasets import Planetoid
 from torch_geometric.transforms import NormalizeFeatures
+import numpy as np
 
 
 def get_data_and_indices(dataset_name):
@@ -26,6 +28,9 @@ def get_data_and_indices(dataset_name):
 
         model_params = {"num_classes":47, "num_features":100}
         return products_dataset.data, splits, model_params
+    
+    elif dataset_name == "Tishby":
+        X, y = np.load("comparison/tishby_X.npy"), np.load("comparison/tishby_y.npy")
         
     else:
         print(f"Dataset {dataset_name} not found")

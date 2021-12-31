@@ -135,3 +135,7 @@ data/
 # folder that tracks stored activations
 
 activations/
+
+# results folder
+
+results/

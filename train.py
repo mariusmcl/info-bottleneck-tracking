@@ -1,20 +1,32 @@
 from numpy import mod
+import numpy as np
+from numpy.lib.utils import info
 import torch
 import argparse
+
 from activation_trackers import ActivationTracker
 from models import get_and_create_model
 from data_pipelines import get_data_and_indices
+from helpers import make_sure_path_exists
+import time
+import json
+import dill
 
 
 
-def train(model, tracker, optimizer, criterion, data_, split_indices, num_epochs, verbose=True):
+def train(model, tracker, optimizer, criterion, data_, split_indices, num_epochs, verbose=True, model_name=None):
     losses, val_accuracies, train_accuracies = [], [], []
     for epoch in range(1, num_epochs):
         tracker.register_new_epoch(['act1', 'act2', 'act3'])
         model.train()
         optimizer.zero_grad()
-        out = model(data_.x, data_.edge_index)
+
+        if model_name == "MLP":
+            out = model(data_.x)
+        else:
+            out = model(data_.x, data_.edge_index)
         train_loss = criterion(out[split_indices["train"]], data_.y[split_indices["train"]])
+
         train_loss.backward()
         tracker.save()
         losses.append(train_loss.cpu().item())
@@ -29,8 +41,9 @@ def train(model, tracker, optimizer, criterion, data_, split_indices, num_epochs
             val_acc = int(val_correct.sum()) / pred[split_indices["valid"]].shape[0]
             val_accuracies.append(val_acc)
         
-        #if verbose:
-        print(f'Epoch: {epoch:03d}, Loss: {train_loss:.4f}, Valacc{val_acc:.4f}, Trainacc {acc:.4f}')
+        if verbose:
+            print(f'Epoch: {epoch:03d}, Loss: {train_loss:.4f}, Valacc{val_acc:.4f}, Trainacc {acc:.4f}')
+
     return losses, val_accuracies, train_accuracies
 
 
@@ -42,21 +55,28 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Trains a chosen model on a dataset")
     parser.add_argument("--model", default="GCN", choices=model_choices)
     parser.add_argument("--dataset", default="Cora", choices=dataset_choices)
-    parser.add_argument("--hidden_dim", default=200, help="Number of neurons in the hidden layers")
+    parser.add_argument("--hidden_dim", default=100, help="Number of neurons in the hidden layers")
     parser.add_argument("--activation", default="relu", help="Activation to be used for hidden layers in the network")
     parser.add_argument("--epochs", default=100, help="Number of epochs to train with gradient descent. Note that we use the entire dataset for each gradient update")
     parser.add_argument("--lr", default=1e-3, help="Learning rate of the Adam optimizer")
+    parser.add_argument("--storeMI", default=True, help="If we are to only track the MI during training, and not save the activations")
+    parser.add_argument("--allIdx", default=0, type=int, help="Whether to compute the MI plane with all data (1), or only training data (0)")
 
     args = parser.parse_args()
     model_name, dataset_name = args.model, args.dataset
+
+    print(f"you chose model: {model_name}, and dataset: {dataset_name}")
 
     data, splits, model_params = get_data_and_indices(dataset_name)
 
     model_params = {**model_params, "hidden_channels": args.hidden_dim, "activation": args.activation}
 
     model = get_and_create_model(model_name, model_parameters=model_params)
-
-    tracker = ActivationTracker(model, training_indices=splits["train"])
+    
+    if not args.allIdx:
+        tracker = ActivationTracker(model, training_indices=splits["train"], store_MI=args.storeMI, y=data.y.unsqueeze(1))
+    else:
+        tracker = ActivationTracker(model, store_MI=args.storeMI, y=data.y.unsqueeze(1))
 
     losses, validation_accuracies, training_accuracies = train(
         model=model,
@@ -65,12 +85,27 @@ if __name__ == "__main__":
         optimizer=torch.optim.Adam(model.parameters(), lr=args.lr),
         criterion= torch.nn.CrossEntropyLoss(),
         data_=data,
-        num_epochs=args.epochs
+        num_epochs=int(args.epochs),
+        model_name=model_name
     )
+    print("Finished training, writing data to file")
+    now = time.strftime("%d%m%Y-%H%M%S")
+    config = model_name + "-" + dataset_name + "-" + str(args.epochs) + "E-"
+    PATH = "results/" + config + now
+    
+    if args.allIdx:
+        PATH += "-AllIdx"
+    
+    PATH += "/"
+    
+    make_sure_path_exists(PATH)
+    with open(PATH + "config.json", "w+") as f:
+        json.dump(vars(args), f)
+    with open(PATH + "data.pickle", "wb") as f:
+        to_dump = {"losses": losses, "val_accs": validation_accuracies, "train_accs": training_accuracies}
+        if args.storeMI:
+            print("storing MI values to file")
+            to_dump["storeMI"] = tracker.MI_STORE
+        dill.dump(to_dump, file=f)
 
-    #print(model, dataset)
-    print(f"you chose model: {model_name}, and dataset: {dataset_name}")
-
-    a=2
-
-
+    print(f"Training finished, logged to directory {PATH}")
