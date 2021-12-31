@@ -65,13 +65,15 @@ if __name__ == "__main__":
     args = parser.parse_args()
     model_name, dataset_name = args.model, args.dataset
 
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
     print(f"you chose model: {model_name}, and dataset: {dataset_name}")
 
     data, splits, model_params = get_data_and_indices(dataset_name)
 
     model_params = {**model_params, "hidden_channels": args.hidden_dim, "activation": args.activation}
 
-    model = get_and_create_model(model_name, model_parameters=model_params)
+    model = get_and_create_model(model_name, model_parameters=model_params, device=device)
     
     if not args.allIdx:
         tracker = ActivationTracker(model, training_indices=splits["train"], store_MI=args.storeMI, y=data.y.unsqueeze(1))

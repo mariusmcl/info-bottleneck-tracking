@@ -146,16 +146,16 @@ class TishbyNet(nn.Module):
     def forward(self, x):
         return self.net(x)
 
-def get_and_create_model(model_name, model_parameters):
+def get_and_create_model(model_name, model_parameters, device):
     if model_name == "GCN":
-        return GCN(**model_parameters)
+        return GCN(**model_parameters).to(device)
     elif model_name == "GAT":
-        return GAT(**model_parameters)
+        return GAT(**model_parameters).to(device)
     elif model_name == "GIN":
-        return GIN(**model_parameters)
+        return GIN(**model_parameters).to(device)
     elif model_name == "MLP":
-        return MLP(**model_parameters)
+        return MLP(**model_parameters).to(device)
     elif model_name == "TishbyNet":
-        return TishbyNet()
+        return TishbyNet().to(device)
     else:
         print(f"model name {model_name} is not available")
