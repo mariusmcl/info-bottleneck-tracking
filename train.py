@@ -61,21 +61,22 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Trains a chosen model on a dataset")
     parser.add_argument("--model", default="GCN", choices=model_choices)
     parser.add_argument("--dataset", default="Cora", choices=dataset_choices)
-    parser.add_argument("--hidden_dim", default=100, help="Number of neurons in the hidden layers")
+    parser.add_argument("--hidden_dim", default=100, type=int, help="Number of neurons in the hidden layers")
     parser.add_argument("--activation", default="relu", help="Activation to be used for hidden layers in the network")
     parser.add_argument("--epochs", default=100, help="Number of epochs to train with gradient descent. Note that we use the entire dataset for each gradient update")
     parser.add_argument("--lr", default=1e-3, help="Learning rate of the Adam optimizer")
     parser.add_argument("--storeMI", default=True, help="If we are to only track the MI during training, and not save the activations")
     parser.add_argument("--allIdx", default=0, type=int, help="Whether to compute the MI plane with all data (1), or only training data (0)")
+    parser.add_argument("--reduction", default=1, type=int, help="Reduce the amount of data processed")
 
     args = parser.parse_args()
     model_name, dataset_name = args.model, args.dataset
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    print(f"you chose model: {model_name}, and dataset: {dataset_name}")
+    print(f"you chose model: {model_name}, and dataset: {dataset_name}, epochs: {args.epochs}, with reduction {args.reduction}, model_size {args.hidden_dim}")
 
-    data, splits, model_params = get_data_and_indices(dataset_name)
+    data, splits, model_params = get_data_and_indices(dataset_name, reduction_factor=args.reduction)
 
     model_params = {**model_params, "hidden_channels": args.hidden_dim, "activation": args.activation}
 
