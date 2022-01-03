@@ -7,6 +7,7 @@ import numpy as np
 import torch
 
 
+
 def get_data_and_indices(dataset_name, reduction_factor=None):
     if dataset_name == "Cora":
         dataset = Planetoid(root='data/Planetoid', name='Cora', transform=NormalizeFeatures()) 
@@ -18,6 +19,27 @@ def get_data_and_indices(dataset_name, reduction_factor=None):
     elif dataset_name == "arxiv":
         arxiv_dataset = PygNodePropPredDataset(name = "ogbn-arxiv", root = 'data/arxiv')
         splits = arxiv_dataset.get_idx_split()
+
+        arxiv_dataset.data.y = arxiv_dataset.data.y.squeeze()
+        model_params = {"num_classes":40, "num_features": 128}
+        return arxiv_dataset.data, splits, model_params
+
+    elif dataset_name == "products":
+        products_dataset = PygNodePropPredDataset(name = "ogbn-products", root = 'data/products')
+        splits = products_dataset.get_idx_split()
+
+        model_params = {"num_classes":47, "num_features":100}
+        return products_dataset.data, splits, model_params
+    
+    elif dataset_name == "Tishby":
+        X, y = np.load("comparison/tishby_X.npy"), np.load("comparison/tishby_y.npy")
+        
+    else:
+        print(f"Dataset {dataset_name} not found")
+
+
+def clean_and_remove_indices(data, splits, dataset_name):
+    if dataset_name == "arxiv":
         REDUCTION_FACTOR = 8 if reduction_factor is None else reduction_factor
         splits["train"] = splits["train"][::REDUCTION_FACTOR]   # Went out of memory (33GB) when comupting full
         splits["valid"] = splits["valid"][::REDUCTION_FACTOR]   
@@ -59,20 +81,5 @@ def get_data_and_indices(dataset_name, reduction_factor=None):
 
         splits["train"] = train_indices
         splits["valid"] = valid_indices
-
-        arxiv_dataset.data.y = arxiv_dataset.data.y.squeeze()
-        model_params = {"num_classes":40, "num_features": 128}
-        return arxiv_dataset.data, splits, model_params
-
-    elif dataset_name == "products":
-        products_dataset = PygNodePropPredDataset(name = "ogbn-products", root = 'data/products')
-        splits = products_dataset.get_idx_split()
-
-        model_params = {"num_classes":47, "num_features":100}
-        return products_dataset.data, splits, model_params
-    
-    elif dataset_name == "Tishby":
-        X, y = np.load("comparison/tishby_X.npy"), np.load("comparison/tishby_y.npy")
-        
-    else:
-        print(f"Dataset {dataset_name} not found")
+        return
+    return
