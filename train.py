@@ -64,7 +64,7 @@ if __name__ == "__main__":
     parser.add_argument("--hidden_dim", default=100, type=int, help="Number of neurons in the hidden layers")
     parser.add_argument("--activation", default="relu", help="Activation to be used for hidden layers in the network")
     parser.add_argument("--epochs", default=100, help="Number of epochs to train with gradient descent. Note that we use the entire dataset for each gradient update")
-    parser.add_argument("--lr", default=1e-3, help="Learning rate of the Adam optimizer")
+    parser.add_argument("--lr", default=1e-2, help="Learning rate of the Adam optimizer")
     parser.add_argument("--storeMI", default=True, help="If we are to only track the MI during training, and not save the activations")
     parser.add_argument("--allIdx", default=0, type=int, help="Whether to compute the MI plane with all data (1), or only training data (0)")
     parser.add_argument("--reduction", default=1, type=int, help="Reduce the amount of data processed")
@@ -75,14 +75,16 @@ if __name__ == "__main__":
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     print(f"you chose model: {model_name}, and dataset: {dataset_name}, epochs: {args.epochs}, with reduction {args.reduction}, model_size {args.hidden_dim}")
-
+    print("learningRate:", args.lr)
     data, splits, model_params = get_data_and_indices(dataset_name, reduction_factor=args.reduction)
 
     model_params = {**model_params, "hidden_channels": args.hidden_dim, "activation": args.activation}
 
     model = get_and_create_model(model_name, model_parameters=model_params, device=device)
     
+    print("args.allidx:", args.allIdx)
     if not args.allIdx:
+        print("using training_idx")
         tracker = ActivationTracker(model, training_indices=splits["train"], store_MI=args.storeMI, y=data.y.unsqueeze(1))
     else:
         tracker = ActivationTracker(model, store_MI=args.storeMI, y=data.y.unsqueeze(1))

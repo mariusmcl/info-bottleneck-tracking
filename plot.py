@@ -8,10 +8,11 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Where the storage files are locatde")
     parser.add_argument("--directory", default="results/GCN-Cora-30122021-230616")
-    parser.add_argument("--everyN", default=10, help="At what interval to plot the MI values")
+    parser.add_argument("--everyN", default=10, type=int, help="At what interval to plot the MI values")
 
     args = parser.parse_args()
-
+    
+    print("Directory:", args.directory, "everyN:", args.everyN)
     with open(args.directory + "/data.pickle", "rb") as f:
         data = dill.load(f)
     

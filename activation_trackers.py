@@ -55,7 +55,8 @@ class ActivationTracker:
                     y = self.y[self.training_indices]
                 else:
                     y = self.y
-                IXT, ITY = KOLCHINSKY_MUTUAL_INFO_COMPUTATION(activations, y)
+                #print(activations.shape, y.shape)
+                IXT, ITY = KOLCHINSKY_MUTUAL_INFO_COMPUTATION(activations[::5], y[::5])
                 self.MI_STORE[self.epoch_number][key] = [IXT, ITY]
             else:
                 if self.epoch_activations[self.epoch_number][key] is None:
