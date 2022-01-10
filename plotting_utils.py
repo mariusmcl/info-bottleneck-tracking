@@ -75,3 +75,76 @@ def plot_information_plane(IXT_array, ITY_array, num_epochs, every_n,
     plt.tight_layout()
     plt.savefig(PATH + "MIPlane" '.png')
     plt.show()
+
+
+def plot_information_plane_paper(IXT_array, ITY_array, num_epochs, every_n, PATH,
+                           xlim=None, ylim=None, inset=False):
+    assert len(IXT_array) == len(ITY_array)
+    scale = 6
+    SMALL_SIZE = 16 
+    MEDIUM_SIZE = SMALL_SIZE + 4 + scale
+    BIGGER_SIZE = MEDIUM_SIZE + 4 + scale + 2
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    plt.subplots_adjust(left=0.1, bottom=0.12, right=1.05, top=0.94, wspace=0, hspace=0)
+    ax.set_xlabel('$I(X;Z)$')
+    ax.set_ylabel('$I(Z;Y)$')
+    ax.xaxis.label.set_size(SMALL_SIZE)
+    ax.yaxis.label.set_size(SMALL_SIZE)
+    ax.tick_params(labelsize=SMALL_SIZE)
+    ax.tick_params(labelsize=SMALL_SIZE)
+    max_index = len(IXT_array)
+    # Create an inset in the lower right corner (loc=4) with borderpad=1, i.e.
+    # 10 points padding (as 10pt is the default fontsize) to the parent axes
+
+#    axins = inset_axes(ax, width="40%", height="40%", loc=4, borderpad=1)
+    if inset:
+
+        axins = ax.inset_axes([0.6, 0.08, 0.4, 0.3])
+    #    axins.set_xlim(6.6, 7.2)
+        if inset == "GCN":
+            axins.set_xlim(14.14, 14.2)
+            axins.set_ylim(4.43, 4.44)
+        elif inset == "GAT":
+            axins.set_xlim(14.05, 14.2)
+            axins.set_ylim(4.4, 4.5)
+        elif inset == "MLP":
+            axins.set_xlim(13.8, 14.3)
+            axins.set_ylim(4.3, 4.5)
+
+        axins.tick_params(labelsize=SMALL_SIZE)
+#    axins.xaxis.label.set_size(SMALL_SIZE)
+#    axins.yaxis.label.set_size(SMALL_SIZE)
+
+    if xlim is not None:
+        plt.xlim(xlim)
+    if ylim is not None:
+        plt.ylim(ylim)
+    cmap = plt.get_cmap('viridis')
+    colors = [cmap(i) for i in np.linspace(0, 1, num_epochs + 1)]
+    markers = ['o', 'v', 's', '^', 'X', 'P']
+
+    for i in range(0, max_index):
+        IXT = IXT_array[i, :]
+        ITY = ITY_array[i, :]
+        for k in range(len(IXT)):
+            ax.plot(IXT[k], ITY[k], marker=markers[k], markersize=12, markeredgewidth=0.04,
+                 linestyle=None, linewidth=1, color=colors[i * every_n], zorder=10, alpha=0.5)
+            if inset:
+                axins.plot(IXT[k], ITY[k], marker=markers[k], markersize=12, markeredgewidth=0.04,
+                    linestyle=None, linewidth=1, color=colors[i * every_n], zorder=10, alpha=0.5)
+
+        for j in range(len(IXT)):
+            #plt.plot(IXT, ITY, linestyle=None, linewidth=1, color=colors[i*every_n], zorder=10)
+            ax.annotate(j+1, (IXT[j], ITY[j]), size=SMALL_SIZE-4)
+
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=0, vmax=1))
+    sm._A = []
+    cbar = plt.colorbar(sm, ticks=[])
+    cbar.set_label('Training epochs', size=SMALL_SIZE)
+    cbar.ax.text(0.5, -0.01, 0, transform=cbar.ax.transAxes, va='top', ha='center', size=SMALL_SIZE)
+    cbar.ax.text(0.5, 1.0, max_index, transform=cbar.ax.transAxes, va='bottom', ha='center', size=SMALL_SIZE)  # str(num_epochs)
+    plt.savefig(PATH + "MIPlanev2" '.png')
+    plt.show()
+
+#    plt.savefig(figname + '.png')

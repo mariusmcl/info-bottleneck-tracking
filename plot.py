@@ -1,7 +1,7 @@
 import argparse
 import dill
 import numpy as np
-from plotting_utils import plot_train_and_val_accuracies, plot_information_plane
+from plotting_utils import plot_train_and_val_accuracies, plot_information_plane, plot_information_plane_paper
 
 
 if __name__ == "__main__":
@@ -9,6 +9,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Where the storage files are locatde")
     parser.add_argument("--directory", default="results/GCN-Cora-30122021-230616")
     parser.add_argument("--everyN", default=10, type=int, help="At what interval to plot the MI values")
+    parser.add_argument("--inset", default="", type=str, help="Whether to plot with a custom inset")
 
     args = parser.parse_args()
     
@@ -34,14 +35,25 @@ if __name__ == "__main__":
     items = PATH.split("-")
     model_name, dataset_name = items[0], items[1]
 
-    plot_train_and_val_accuracies(train_accs=train_accs,val_accs=val_accs,PATH=PATH,model_name=model_name,dataset_name=dataset_name)
+    #plot_train_and_val_accuracies(train_accs=train_accs,val_accs=val_accs,PATH=PATH,model_name=model_name,dataset_name=dataset_name)
 
-    plot_information_plane(
-        IXT_array=IXT_array,
-        ITY_array=ITY_array,
-        num_epochs=num_epochs,
-        PATH=PATH,
-        every_n=1,
-        model_name=model_name,
-        dataset_name=dataset_name
-    )
+    if len(args.inset) > 0:
+        print("Creating inset:")
+        plot_information_plane_paper(
+            IXT_array=IXT_array,
+            ITY_array=ITY_array,
+            num_epochs=num_epochs,
+            every_n=1,
+            PATH=PATH,
+            inset=args.inset
+        )
+    else:
+        plot_information_plane(
+            IXT_array=IXT_array,
+            ITY_array=ITY_array,
+            num_epochs=num_epochs,
+            PATH=PATH,
+            every_n=1,
+            model_name=model_name,
+            dataset_name=dataset_name
+        )

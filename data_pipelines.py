@@ -33,6 +33,8 @@ def get_data_and_indices(dataset_name, reduction_factor=None):
     
     elif dataset_name == "Tishby":
         X, y = np.load("comparison/tishby_X.npy"), np.load("comparison/tishby_y.npy")
+        N = X.shape[0]
+        num_val = N // 10
         
     else:
         print(f"Dataset {dataset_name} not found")
