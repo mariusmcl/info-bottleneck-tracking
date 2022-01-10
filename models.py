@@ -13,11 +13,11 @@ class GAT(torch.nn.Module):
             elif activation == "tanh":
                 return nn.Tanh()
         super().__init__()
-        self.gat_conv1 = GATConv(num_features, hidden_channels)
+        self.gat_conv1 = GATConv(num_features, 3*hidden_channels)
         self.act1 = act_func(activation=activation) 
-        self.gat_conv2 = GATConv(hidden_channels, hidden_channels)
+        self.gat_conv2 = GATConv(3*hidden_channels, 2*hidden_channels)
         self.act2 = act_func(activation=activation) 
-        self.gat_conv3 = GATConv(hidden_channels, hidden_channels)
+        self.gat_conv3 = GATConv(2*hidden_channels, hidden_channels)
         self.act3 = act_func(activation=activation) 
         self.gat_conv4 = GATConv(hidden_channels, num_classes)
 

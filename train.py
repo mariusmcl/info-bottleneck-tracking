@@ -81,7 +81,7 @@ if __name__ == "__main__":
     model_params = {**model_params, "hidden_channels": args.hidden_dim, "activation": args.activation}
 
     model = get_and_create_model(model_name, model_parameters=model_params, device=device)
-    
+    print(model)
     print("args.allidx:", args.allIdx)
     if not args.allIdx:
         print("using training_idx")
