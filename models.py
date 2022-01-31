@@ -6,6 +6,17 @@ import numpy as np
 
 
 class GAT(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.gat_conv1 = GATConv()
+        self.act1 = nn.ReLU()
+        self.gat_conv2 = GATConv()
+        self.act2 = nn.ReLU()
+        self.gat_conv3 = GATConv()
+        self.act3 = nn.ReLU()
+        self.gat_conv4 = GATConv()
+
+class GAT(torch.nn.Module):
     def __init__(self, hidden_channels, num_classes, num_features, activation="relu"):
         def act_func(activation):
             if activation == "relu":
@@ -132,11 +143,11 @@ class TishbyNet(nn.Module):
     def __init__(self):
         super(TishbyNet, self).__init__()
         self.net = nn.Sequential(OrderedDict([
-            ('fc1', nn.Linear(12, 10)), ('tanh1', nn.Tanh()),
-            ('fc2', nn.Linear(10, 7)), ('tanh2', nn.Tanh()),
-            ('fc3', nn.Linear(7, 5)), ('tanh3', nn.Tanh()),
-            ('fc4', nn.Linear(5, 4)), ('tanh4', nn.Tanh()),
-            ('fc5', nn.Linear(4, 3)), ('tanh5', nn.Tanh()),
+            ('fc1', nn.Linear(12, 10)), ('relu1', nn.ReLU()),
+            ('fc2', nn.Linear(10, 7)), ('relu2', nn.ReLU()),
+            ('fc3', nn.Linear(7, 5)), ('relu3', nn.ReLU()),
+            ('fc4', nn.Linear(5, 4)), ('relu4', nn.ReLU()),
+            ('fc5', nn.Linear(4, 3)), ('relu5', nn.ReLU()),
             ('fc6', nn.Linear(3, 1))]))
         def weight_init(m):
             if isinstance(m, nn.Linear):
@@ -146,7 +157,7 @@ class TishbyNet(nn.Module):
     def forward(self, x):
         return self.net(x)
 
-def get_and_create_model(model_name, model_parameters, device):
+def get_and_create_model(model_name, device, model_parameters=None):
     if model_name == "GCN":
         return GCN(**model_parameters).to(device)
     elif model_name == "GAT":
@@ -156,6 +167,6 @@ def get_and_create_model(model_name, model_parameters, device):
     elif model_name == "MLP":
         return MLP(**model_parameters).to(device)
     elif model_name == "TishbyNet":
-        return TishbyNet().to(device)
+        return TishbyNet()   # Just keep on CPU
     else:
         print(f"model name {model_name} is not available")

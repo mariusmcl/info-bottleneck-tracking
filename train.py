@@ -26,11 +26,13 @@ def train(model, tracker, optimizer, criterion, data_, split_indices, num_epochs
         tracker.register_new_epoch(['act1', 'act2', 'act3'])
         model.train()
         optimizer.zero_grad()
-
+        #print(data_.y.dtype, data_.y.shape, data_.x.dtype, split_indices["train"].dtype, split_indices["train"].shape)
+        #raise
         if model_name == "MLP":
             out = model(data_.x)
         else:
             out = model(data_.x, data_.edge_index)
+        #print(out[split_indices["train"]].shape, out[split_indices["train"]].dtype, data_.y[split_indices["train"]].shape, data_.y[split_indices["train"]].dtype)
         train_loss = criterion(out[split_indices["train"]], data_.y[split_indices["train"]])
 
         train_loss.backward()
@@ -64,7 +66,7 @@ if __name__ == "__main__":
     parser.add_argument("--hidden_dim", default=100, type=int, help="Number of neurons in the hidden layers")
     parser.add_argument("--activation", default="relu", help="Activation to be used for hidden layers in the network")
     parser.add_argument("--epochs", default=100, help="Number of epochs to train with gradient descent. Note that we use the entire dataset for each gradient update")
-    parser.add_argument("--lr", default=1e-2, help="Learning rate of the Adam optimizer")
+    parser.add_argument("--lr", default=1e-4, help="Learning rate of the Adam optimizer")
     parser.add_argument("--storeMI", default=True, help="If we are to only track the MI during training, and not save the activations")
     parser.add_argument("--allIdx", default=0, type=int, help="Whether to compute the MI plane with all data (1), or only training data (0)")
     parser.add_argument("--reduction", default=1, type=int, help="Reduce the amount of data processed")

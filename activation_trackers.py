@@ -36,6 +36,7 @@ class ActivationTracker:
     def register_new_epoch(self, what_to_save):
         if self.MI_STORE is not None:
             self.MI_STORE.append({key: None for key in self.forward_hooks.keys() if key in what_to_save})
+            #print("Appending new epoch")
         self.epoch_activations.append({key: None for key in self.forward_hooks.keys() if key in what_to_save})
         self.epoch_number += 1
 
@@ -44,6 +45,8 @@ class ActivationTracker:
 
     def save(self):
         # y here should be fore the whole dataset, i.e. same that was passed to model.forward()
+        #print("SAVING")
+        #print(self.MI_STORE, self.y)
         for key in self.epoch_activations[self.epoch_number].keys():
             if self.training_indices is not None:
                 activations = self.forward_hooks[key].output.detach().cpu()[self.training_indices].numpy()
@@ -55,8 +58,7 @@ class ActivationTracker:
                     y = self.y[self.training_indices]
                 else:
                     y = self.y
-                #print(activations.shape, y.shape)
-                IXT, ITY = KOLCHINSKY_MUTUAL_INFO_COMPUTATION(activations[::5], y[::5])
+                IXT, ITY = KOLCHINSKY_MUTUAL_INFO_COMPUTATION(activations[::5], y[::5], noise_variance=0.1)
                 self.MI_STORE[self.epoch_number][key] = [IXT, ITY]
             else:
                 if self.epoch_activations[self.epoch_number][key] is None:

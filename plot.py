@@ -35,7 +35,7 @@ if __name__ == "__main__":
     items = PATH.split("-")
     model_name, dataset_name = items[0], items[1]
 
-    #plot_train_and_val_accuracies(train_accs=train_accs,val_accs=val_accs,PATH=PATH,model_name=model_name,dataset_name=dataset_name)
+    plot_train_and_val_accuracies(train_accs=train_accs,val_accs=val_accs,PATH=PATH,model_name=model_name,dataset_name=dataset_name)
 
     if len(args.inset) > 0:
         print("Creating inset:")

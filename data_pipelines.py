@@ -35,7 +35,10 @@ def get_data_and_indices(dataset_name, reduction_factor=None):
         X, y = np.load("comparison/tishby_X.npy"), np.load("comparison/tishby_y.npy")
         N = X.shape[0]
         num_val = N // 10
-        
+        train_idx = [True if i < (N - num_val) else False for i in range(N)]
+        val_idx = [False if i < (N - num_val) else True for i in range(N)]
+        print(f"Num train: f{len(train_idx)}, val: {len(val_idx)}, last train_idx/first_validx: {train_idx[-1]}, {val_idx[0]}")
+        return torch.tensor(X).float(), torch.tensor(y).long(), {"train": torch.tensor(train_idx).bool(), "valid": torch.tensor(val_idx).bool()}
     else:
         print(f"Dataset {dataset_name} not found")
 
